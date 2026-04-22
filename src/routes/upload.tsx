@@ -15,10 +15,10 @@ export const Route = createFileRoute("/upload")({
 type Stage = "idle" | "uploading" | "extracting" | "generating" | "done" | "error";
 
 async function readPdfText(file: File): Promise<string> {
-  // Lazy load pdfjs to keep bundle light
+  // Lazy load pdfjs and bundle the worker locally via Vite (?url) to avoid CDN/version mismatches
   const pdfjs: any = await import("pdfjs-dist");
-  // worker is required; use a CDN worker URL matching version
-  pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+  const workerUrl = (await import("pdfjs-dist/build/pdf.worker.min.mjs?url")).default;
+  pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
   const buf = await file.arrayBuffer();
   const doc = await pdfjs.getDocument({ data: buf }).promise;
   let text = "";
