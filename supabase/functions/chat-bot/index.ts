@@ -8,7 +8,7 @@ type BotType = "helper" | "cluebot";
 
 const BOT_CONFIG: Record<BotType, { model: string; systemPrompt: string }> = {
   helper: {
-    model: "gemma-3-27b-it",
+    model: "google/gemini-2.5-flash",
     systemPrompt:
       "You are Helper, a warm and encouraging AI study assistant for Quizify. " +
       "You help students understand quiz concepts, clarify confusing topics, and break down " +
@@ -16,7 +16,7 @@ const BOT_CONFIG: Record<BotType, { model: string; systemPrompt: string }> = {
       "When a student seems stuck, guide them with questions rather than just giving the answer.",
   },
   cluebot: {
-    model: "gemini-2.5-flash",
+    model: "google/gemini-3-flash-preview",
     systemPrompt:
       "You are ClueBot, an analytical AI assistant for Quizify. " +
       "You specialise in strategic hints, spotting patterns in exam questions, and coaching " +
@@ -51,23 +51,21 @@ Deno.serve(async (req) => {
       return jsonError("messages array is required and must not be empty.", 400);
     }
 
-    const GOOGLE_AI_API_KEY = Deno.env.get("GOOGLE_AI_API_KEY");
-    if (!GOOGLE_AI_API_KEY) throw new Error("GOOGLE_AI_API_KEY is not configured in Edge Function secrets.");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured.");
 
     const { model, systemPrompt } = BOT_CONFIG[bot];
 
-    // Google AI OpenAI-compatible endpoint supports both Gemma and Gemini models
-    const response = await fetch("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${GOOGLE_AI_API_KEY}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         model,
         messages: [
           { role: "system", content: systemPrompt },
-          // Send last 12 turns for context without ballooning token usage
           ...messages.slice(-12),
         ],
         max_tokens: 1024,
@@ -77,9 +75,10 @@ Deno.serve(async (req) => {
 
     if (!response.ok) {
       if (response.status === 429) return jsonError("Rate limit exceeded — please wait a moment and try again.", 429);
-      if (response.status === 401) return jsonError("Invalid Google AI API key.", 401);
+      if (response.status === 402) return jsonError("AI credits are unavailable right now. Please top up Lovable AI usage and try again.", 402);
+      if (response.status === 401) return jsonError("AI gateway authentication failed.", 401);
       const raw = await response.text();
-      console.error("Google AI error", response.status, raw);
+      console.error("Lovable AI error", response.status, raw);
       return jsonError("AI service error. Please try again shortly.", 502);
     }
 
