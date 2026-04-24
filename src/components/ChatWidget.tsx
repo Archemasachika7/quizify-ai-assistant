@@ -248,11 +248,16 @@ export function ChatWidget() {
 
       // Persist async — don't block the UI
       persistMessages(sid, trimmed, data.content as string).catch(console.error);
-    } catch {
+    } catch (error) {
+      const message =
+        error instanceof Error && error.message.trim().length > 0
+          ? error.message
+          : "Oops — something went wrong. Please try again in a moment.";
+
       const errMsg: LocalMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "Oops — something went wrong. Please try again in a moment.",
+        content: message,
         timestamp: new Date(),
       };
       setMessages((prev) => ({ ...prev, [activeBot]: [...prev[activeBot], errMsg] }));
