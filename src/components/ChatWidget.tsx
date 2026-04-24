@@ -177,8 +177,8 @@ export function ChatWidget() {
   // ── Lazily create a Supabase chat session ────────────────────────────
   async function getOrCreateSession(bot: BotType): Promise<string> {
     if (sessionIds[bot]) return sessionIds[bot]!;
-    const { data, error } = await supabase
-      .from("chat_sessions")
+    const { data, error } = await (supabase
+      .from("chat_sessions") as any)
       .insert({
         user_id: user!.id,
         bot_type: bot,
@@ -197,7 +197,7 @@ export function ChatWidget() {
     userContent: string,
     assistantContent: string,
   ) {
-    await supabase.from("chat_messages").insert([
+    await (supabase.from("chat_messages") as any).insert([
       { session_id: sid, role: "user", content: userContent },
       { session_id: sid, role: "assistant", content: assistantContent },
     ]);

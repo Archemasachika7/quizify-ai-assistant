@@ -100,6 +100,88 @@ export type Database = {
           },
         ]
       }
+      chat_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_error: boolean
+          model: string | null
+          role: string
+          session_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_error?: boolean
+          model?: string | null
+          role: string
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_error?: boolean
+          model?: string | null
+          role?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "chat_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_sessions: {
+        Row: {
+          bot_type: string
+          created_at: string
+          id: string
+          is_archived: boolean
+          last_message_at: string | null
+          quiz_id: string | null
+          title: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bot_type: string
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          last_message_at?: string | null
+          quiz_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bot_type?: string
+          created_at?: string
+          id?: string
+          is_archived?: boolean
+          last_message_at?: string | null
+          quiz_id?: string | null
+          title?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_sessions_quiz_id_fkey"
+            columns: ["quiz_id"]
+            isOneToOne: false
+            referencedRelation: "quizzes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
