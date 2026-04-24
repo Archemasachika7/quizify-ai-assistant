@@ -232,7 +232,8 @@ export function ChatWidget() {
         body: { bot: activeBot, messages: history },
       });
 
-      if (error || !data?.content) throw new Error(error?.message || "Empty AI response.");
+      if (error) throw new Error(error.message || "Edge Function error");
+      if (!data?.content) throw new Error(data?.error || "Empty AI response");
 
       const assistantMsg: LocalMessage = {
         id: crypto.randomUUID(),
@@ -248,11 +249,13 @@ export function ChatWidget() {
 
       // Persist async — don't block the UI
       persistMessages(sid, trimmed, data.content as string).catch(console.error);
-    } catch {
+    } catch (err) {
+      const reason = err instanceof Error ? err.message : "Unknown error";
+      console.error("[ChatWidget]", reason);
       const errMsg: LocalMessage = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "Oops — something went wrong. Please try again in a moment.",
+        content: `Error: ${reason}`,
         timestamp: new Date(),
       };
       setMessages((prev) => ({ ...prev, [activeBot]: [...prev[activeBot], errMsg] }));
