@@ -1,5 +1,6 @@
 import { Outlet, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
 import { Toaster } from "@/components/ui/sonner";
+import { ChatWidget } from "@/components/ChatWidget";
 import appCss from "../styles.css?url";
 
 function NotFoundComponent() {
@@ -36,7 +37,12 @@ export const Route = createRootRoute({
     links: [{ rel: "stylesheet", href: appCss }],
   }),
   shellComponent: RootShell,
-  component: () => <Outlet />,
+  component: () => (
+    <>
+      <Outlet />
+      <ChatWidget />
+    </>
+  ),
   notFoundComponent: NotFoundComponent,
 });
 
