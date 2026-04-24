@@ -142,8 +142,8 @@ function ResultsPage() {
                 </div>
                 <div className="mt-4 space-y-2">
                   {q.options.map((opt, i) => {
-                    const isCorrect = i === q.correct_index;
-                    const isSelected = a?.selected_index === i;
+                    const isCorrect = i === Number(q.correct_index);
+                    const isSelected = a?.selected_index !== null && a?.selected_index !== undefined && Number(a.selected_index) === i;
                     const cls = isCorrect
                       ? "border-success/60 bg-success/10 text-foreground"
                       : isSelected

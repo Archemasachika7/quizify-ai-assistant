@@ -56,12 +56,13 @@ function QuizPage() {
       let score = 0;
       const rows = questions.map((q) => {
         const sel = answers[q.id];
-        const correct = sel === q.correct_index;
+        const correctIdx = Number(q.correct_index);
+        const correct = sel !== undefined && Number(sel) === correctIdx;
         if (correct) score++;
         return { question_id: q.id, selected_index: sel ?? null, is_correct: correct };
       });
       const total = questions.length;
-      const pct = (score / total) * 100;
+      const pct = total > 0 ? (score / total) * 100 : 0;
       const { data: attempt, error } = await supabase
         .from("attempts")
         .insert({
@@ -70,13 +71,20 @@ function QuizPage() {
         })
         .select("id")
         .single();
-      if (error) throw error;
+      if (error) {
+        console.error("attempts insert error", error);
+        throw error;
+      }
       const ansRows = rows.map((r) => ({ ...r, attempt_id: attempt.id }));
       const { error: aErr } = await supabase.from("attempt_answers").insert(ansRows);
-      if (aErr) throw aErr;
+      if (aErr) {
+        console.error("attempt_answers insert error", aErr);
+        throw aErr;
+      }
       navigate({ to: "/quiz/$id/results", params: { id }, search: { attempt: attempt.id } });
     } catch (e: any) {
-      toast.error(e.message ?? "Failed to submit");
+      console.error("Submit failed", e);
+      toast.error(e?.message || e?.details || "Failed to submit quiz");
       setSubmitting(false);
     }
   };
